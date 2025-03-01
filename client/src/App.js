@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './components/Home';
 import Cart from './components/Cart';
+import ProductDetail from './components/ProductDetail';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -34,17 +35,26 @@ function App() {
 
   // Add product to cart
   const addToCart = (product) => {
+    // Check if the product is in stock
+    if (product.stock <= 0) return;
+
     const existingProduct = cart.find(item => item._id === product._id);
     if (existingProduct) {
+      // Make sure we don't add more than available in stock
+      const newQuantity = existingProduct.quantity + (product.quantity || 1);
+      const finalQuantity = Math.min(newQuantity, product.stock);
+      
       setCart(
         cart.map(item =>
           item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: finalQuantity }
             : item
         )
       );
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      // Add product with quantity (default to 1 if not specified)
+      const quantityToAdd = Math.min(product.quantity || 1, product.stock);
+      setCart([...cart, { ...product, quantity: quantityToAdd }]);
     }
   };
 
@@ -103,6 +113,14 @@ function App() {
                   placeOrder={placeOrder}
                 />
               } 
+            />
+            <Route
+              path="/product/:id"
+              element={
+                <ProductDetail
+                  addToCart={addToCart}
+                />
+              }
             />
           </Routes>
         </main>

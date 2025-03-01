@@ -10,6 +10,7 @@ const products = [
     name: "Samsung Galaxy S21",
     description: "Flagship smartphone with stunning camera capabilities and powerful performance",
     price: 799.99,
+    stock: 25,
     category: "Smartphones",
     image: "https://cdn.pixabay.com/photo/2016/03/27/19/43/smartphone-1283938_1280.jpg",
     specifications: {
@@ -25,6 +26,7 @@ const products = [
     name: "iPhone 13 Pro",
     description: "Apple's premium smartphone with advanced camera system and A15 Bionic chip",
     price: 999.99,
+    stock: 15,
     category: "Smartphones",
     image: "https://cdn.pixabay.com/photo/2020/11/22/11/53/iphone-12-5766344_1280.jpg",
     specifications: {
@@ -40,6 +42,7 @@ const products = [
     name: "Dell XPS 13",
     description: "Ultra-thin laptop with edge-to-edge display and premium build quality",
     price: 1299.99,
+    stock: 10,
     category: "Laptops",
     image: "https://cdn.pixabay.com/photo/2016/03/27/07/12/apple-1282241_1280.jpg",
     specifications: {
@@ -55,8 +58,9 @@ const products = [
     name: "MacBook Pro M1",
     description: "Powerful laptop with Apple's M1 chip and exceptional battery life",
     price: 1299.99,
+    stock: 8,
     category: "Laptops",
-    image: "https://cdn.pixabay.com/photo/2016/10/15/13/40/laptop-1742435_1280.jpg",
+    image: "https://cdn.pixabay.com/photo/2020/06/26/12/21/macbook-pro-5342546_1280.png",
     specifications: {
       display: "13.3-inch Retina",
       processor: "Apple M1",
@@ -70,6 +74,7 @@ const products = [
     name: "Sony WH-1000XM4",
     description: "Industry-leading noise cancelling wireless headphones with exceptional sound quality",
     price: 349.99,
+    stock: 30,
     category: "Audio",
     image: "https://cdn.pixabay.com/photo/2018/09/17/14/27/headphones-3683983_1280.jpg",
     specifications: {
@@ -84,8 +89,9 @@ const products = [
     name: "Apple AirPods Pro",
     description: "Wireless earbuds with active noise cancellation and customizable fit",
     price: 249.99,
+    stock: 0,
     category: "Audio",
-    image: "https://cdn.pixabay.com/photo/2020/12/18/16/56/laptop-5842509_1280.jpg",
+    image: "https://s13emagst.akamaized.net/products/60453/60452176/images/res_391df89bcb38fcb051a48ba6877d78dc.jpg?width=720&height=720&hash=D961A1AD22B0969EFE0A134B8AE3185B",
     specifications: {
       type: "In-ear",
       wireless: "Yes",
@@ -98,6 +104,7 @@ const products = [
     name: "Samsung 65\" QLED 4K Smart TV",
     description: "Premium 4K TV with quantum dot technology for vibrant colors",
     price: 1299.99,
+    stock: 5,
     category: "TVs",
     image: "https://cdn.pixabay.com/photo/2015/02/07/20/58/tv-627876_1280.jpg",
     specifications: {
@@ -112,8 +119,9 @@ const products = [
     name: "LG 55\" OLED C1 Series",
     description: "OLED TV with perfect blacks and wide viewing angles",
     price: 1499.99,
+    stock: 3,
     category: "TVs",
-    image: "https://cdn.pixabay.com/photo/2019/08/11/23/04/tv-4399302_1280.jpg",
+    image: "https://images.samsung.com/is/image/samsung/p6pim/ro/qe55s90daexxh/gallery/ro-oled-s90d-505993-qe55s90daexxh-541983387?$684_547_PNG$",
     specifications: {
       display: "55-inch OLED",
       resolution: "3840x2160",
@@ -126,6 +134,7 @@ const products = [
     name: "Canon EOS R5",
     description: "Full-frame mirrorless camera with 8K video recording",
     price: 3899.99,
+    stock: 2,
     category: "Cameras",
     image: "https://cdn.pixabay.com/photo/2018/01/28/21/14/lens-3114729_1280.jpg",
     specifications: {
@@ -140,8 +149,9 @@ const products = [
     name: "Sony PlayStation 5",
     description: "Next-generation gaming console with lightning-fast loading times",
     price: 499.99,
+    stock: 0,
     category: "Gaming",
-    image: "https://cdn.pixabay.com/photo/2021/09/07/08/56/console-6603120_1280.jpg",
+    image: "https://lcdn.altex.ro/media/catalog/product/c/o/consola_playstation_5_slim_digital_edition_ps5_3_e11cd5fd.png",
     specifications: {
       cpu: "AMD Zen 2 (8 cores)",
       gpu: "AMD RDNA 2",
@@ -154,8 +164,9 @@ const products = [
     name: "Xbox Series X",
     description: "Microsoft's most powerful console with impressive 4K gaming capabilities",
     price: 499.99,
+    stock: 7,
     category: "Gaming",
-    image: "https://cdn.pixabay.com/photo/2016/11/20/21/16/repaired-1843903_1280.jpg",
+    image: "https://lcdn.mediagalaxy.ro/media/catalog/product/C/o/Consola-Xbox-Series-S-Coperta.jpg",
     specifications: {
       cpu: "AMD Zen 2 (8 cores)",
       gpu: "12 TFLOPS, 52 CUs",
@@ -168,8 +179,9 @@ const products = [
     name: "Apple Watch Series 7",
     description: "Advanced smartwatch with larger display and faster charging",
     price: 399.99,
+    stock: 12,
     category: "Wearables",
-    image: "https://cdn.pixabay.com/photo/2015/07/31/11/42/apple-869353_1280.jpg",
+    image: "https://s13emagst.akamaized.net/products/60441/60440994/images/res_921cde12efc92b8c725d4e3c6b95a2de.jpg?width=720&height=720&hash=3472908F98B4FD53DF07317F161912DB",
     specifications: {
       display: "41mm/45mm Always-On Retina",
       battery: "18 hours",
