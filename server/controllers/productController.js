@@ -21,6 +21,55 @@ exports.getProductsByCategory = async (req, res) => {
   }
 };
 
+// Search products by title or description
+exports.searchProducts = async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    if (!query) {
+      return res.json([]);
+    }
+    
+    // Using MongoDB's text search functionality
+    // This relies on the text index that was created in the Product model
+    const products = await Product.find(
+      { $text: { $search: query } },
+      { score: { $meta: "textScore" } }
+    ).sort({ score: { $meta: "textScore" } });
+    
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get suggestions for predictive search
+exports.getSearchSuggestions = async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json([]);
+    }
+    
+    // Find products where name or description contains the query string
+    // Using regex for partial matching
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } }
+      ]
+    }).limit(5).select('name');
+    
+    // Extract just the names for suggestions
+    const suggestions = products.map(product => product.name);
+    
+    res.json(suggestions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get a single product
 exports.getProductById = async (req, res) => {
   try {

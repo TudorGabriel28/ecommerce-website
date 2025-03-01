@@ -5,6 +5,12 @@ const productController = require('../controllers/productController');
 // Get all products
 router.get('/', productController.getProducts);
 
+// Search products
+router.get('/search', productController.searchProducts);
+
+// Get search suggestions for predictive search
+router.get('/suggestions', productController.getSearchSuggestions);
+
 // Get products by category
 router.get('/category/:category', productController.getProductsByCategory);
 
