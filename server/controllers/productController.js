@@ -11,6 +11,47 @@ const initializeSearchIndex = async () => {
   }
 };
 
+// Get all specifications
+  exports.getAllSpecifications = async (req, res) => {
+    try {
+      const specifications = await Product.aggregate([
+        // Unwind specifications to create a document for each key-value pair
+        { $project: { specifications: { $objectToArray: "$specifications" } } },
+        { $unwind: "$specifications" },
+        
+        // Group by specification key and collect unique values
+        {
+          $group: {
+            _id: "$specifications.k",
+            values: { $addToSet: "$specifications.v" }
+          }
+        },
+        
+        // Format the output
+        {
+          $project: {
+            _id: 0,
+            key: "$_id",
+            values: 1
+        }
+      },
+      
+      // Sort by specification key
+      { $sort: { key: 1 } }
+    ]);
+
+    // Convert to object format
+    const formattedSpecs = specifications.reduce((acc, spec) => {
+      acc[spec.key] = spec.values;
+      return acc;
+    }, {});
+
+    res.json(formattedSpecs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get all products
 exports.getProducts = async (req, res) => {
   try {
@@ -41,8 +82,6 @@ exports.searchProducts = async (req, res) => {
       return res.json([]);
     }
     
-    // Using MongoDB's text search functionality
-    // This relies on the text index that was created in the Product model
     const products = await Product.find(
       { $text: { $search: query } },
       { score: { $meta: "textScore" } }
@@ -63,8 +102,6 @@ exports.getSearchSuggestions = async (req, res) => {
       return res.json([]);
     }
     
-    // Find products where name or description contains the query string
-    // Using regex for partial matching
     const products = await Product.find({
       $or: [
         { name: { $regex: query, $options: 'i' } },
@@ -72,7 +109,6 @@ exports.getSearchSuggestions = async (req, res) => {
       ]
     }).limit(5).select('name');
     
-    // Extract just the names for suggestions
     const suggestions = products.map(product => product.name);
     
     res.json(suggestions);

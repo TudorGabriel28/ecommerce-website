@@ -1,21 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ProductCard from './ProductCard';
 
 const SearchResults = ({ addToCart }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [specQuery, setSpecQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
+  const [sortOrder, setSortOrder] = useState('desc');
+  const navigate = useNavigate();
+  
+  // Add state for all specifications from database
+  const [allSpecifications, setAllSpecifications] = useState({});
+  
   const [filters, setFilters] = useState({
     category: '',
     specifications: {}
   });
+
   const [availableFilters, setAvailableFilters] = useState({
     categories: [],
     specifications: {}
   });
+
+  // Fetch all possible specifications from database
+  useEffect(() => {
+    const fetchSpecifications = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products/specifications');
+        if (!response.ok) throw new Error('Failed to fetch specifications');
+        const data = await response.json();
+        setAllSpecifications(data);
+        console.log(data);
+      } catch (err) {
+        console.error('Error fetching specifications:', err);
+      }
+    };
+
+    fetchSpecifications();
+  }, []);
+
+  // Handle specification search
+  const handleSpecSearch = (e) => {
+    e.preventDefault();
+    if (specQuery.trim()) {
+      navigate(`/search-results?query=${encodeURIComponent(specQuery)}`);
+      setSpecQuery('');
+    }
+  };
 
   // Extract unique filters from results
   useEffect(() => {
@@ -64,6 +97,20 @@ const SearchResults = ({ addToCart }) => {
     fetchResults();
   }, [searchParams, sortOrder]);
 
+  // Handle specification filter changes
+  const handleSpecFilterChange = (specKey, value) => {
+    setFilters(prev => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [specKey]: {
+          ...(prev.specifications[specKey] || {}),
+          [value]: !(prev.specifications[specKey]?.[value] || false)
+        }
+      }
+    }));
+  };
+
   // Apply filters to results
   const filteredResults = results.filter(product => {
     // Category filter
@@ -72,26 +119,21 @@ const SearchResults = ({ addToCart }) => {
     }
 
     // Specifications filters
-    for (const [key, value] of Object.entries(filters.specifications)) {
-      if (value && product.specifications[key] !== value) {
-        return false;
+    for (const [specKey, selectedValues] of Object.entries(filters.specifications)) {
+      const activeValues = Object.entries(selectedValues)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([value]) => value);
+      
+      if (activeValues.length > 0) {
+        const productValue = product.specifications[specKey];
+        if (!activeValues.includes(productValue)) {
+          return false;
+        }
       }
     }
 
     return true;
   });
-
-  // Handle filter changes
-  const handleFilterChange = (type, value) => {
-    if (type === 'category') {
-      setFilters(prev => ({ ...prev, category: value }));
-    } else {
-      setFilters(prev => ({
-        ...prev,
-        specifications: { ...prev.specifications, [type]: value }
-      }));
-    }
-  };
 
   if (loading) {
     return (
@@ -114,8 +156,30 @@ const SearchResults = ({ addToCart }) => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8">
         {/* Filters Sidebar */}
-        <div className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white p-4 rounded-lg shadow">
+        <div className="w-full md:w-72 flex-shrink-0 -ml-4">
+          <div className="bg-white p-4 rounded-lg shadow mb-6">
+            {/* Specification Search Box */}
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2">Search Specifications</h3>
+              <form onSubmit={handleSpecSearch}>
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="text"
+                    value={specQuery}
+                    onChange={(e) => setSpecQuery(e.target.value)}
+                    placeholder="e.g., resolution 1920x1080"
+                    className="w-full p-2 border rounded"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    Search
+                  </button>
+                </div>
+              </form>
+            </div>
+
             <h2 className="text-lg font-bold mb-4">Filters</h2>
             
             {/* Sort Order */}
@@ -136,7 +200,7 @@ const SearchResults = ({ addToCart }) => {
               <h3 className="font-semibold mb-2">Category</h3>
               <select
                 value={filters.category}
-                onChange={(e) => handleFilterChange('category', e.target.value)}
+                onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
                 className="w-full p-2 border rounded"
               >
                 <option value="">All Categories</option>
@@ -146,20 +210,26 @@ const SearchResults = ({ addToCart }) => {
               </select>
             </div>
 
-            {/* Specification Filters */}
-            {Object.entries(availableFilters.specifications).map(([spec, values]) => (
+            {/* All Specifications Filters */}
+            {Object.entries(allSpecifications).map(([spec, values]) => (
               <div key={spec} className="mb-6">
                 <h3 className="font-semibold mb-2 capitalize">{spec}</h3>
-                <select
-                  value={filters.specifications[spec] || ''}
-                  onChange={(e) => handleFilterChange(spec, e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="">All {spec}</option>
+                <div className="space-y-2 max-h-40 overflow-y-auto p-2 border rounded bg-gray-50">
                   {values.map(value => (
-                    <option key={value} value={value}>{value}</option>
+                    <label
+                      key={`${spec}-${value}`}
+                      className="flex items-center space-x-2 cursor-pointer hover:bg-white p-1 rounded transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.specifications[spec]?.[value] || false}
+                        onChange={() => handleSpecFilterChange(spec, value)}
+                        className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                      />
+                      <span className="text-sm">{value}</span>
+                    </label>
                   ))}
-                </select>
+                </div>
               </div>
             ))}
           </div>
@@ -178,11 +248,13 @@ const SearchResults = ({ addToCart }) => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResults.map(product => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  addToCart={addToCart}
-                />
+                product && product._id ? (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    addToCart={addToCart}
+                  />
+                ) : null
               ))}
             </div>
           )}
