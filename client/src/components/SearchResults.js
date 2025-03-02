@@ -4,7 +4,7 @@ import ProductCard from './ProductCard';
 
 const SearchResults = ({ addToCart }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [specQuery, setSpecQuery] = useState('');
+  const [specQuery, setSpecQuery] = useState(searchParams.get('query') || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,7 +32,6 @@ const SearchResults = ({ addToCart }) => {
         if (!response.ok) throw new Error('Failed to fetch specifications');
         const data = await response.json();
         setAllSpecifications(data);
-        console.log(data);
       } catch (err) {
         console.error('Error fetching specifications:', err);
       }
@@ -118,21 +117,29 @@ const SearchResults = ({ addToCart }) => {
       return false;
     }
 
-    // Specifications filters
-    for (const [specKey, selectedValues] of Object.entries(filters.specifications)) {
-      const activeValues = Object.entries(selectedValues)
+    // Get active specification filters (those with at least one checkbox checked)
+    const activeFilters = {};
+    Object.entries(filters.specifications).forEach(([specKey, values]) => {
+      const selectedValues = Object.entries(values)
         .filter(([_, isSelected]) => isSelected)
         .map(([value]) => value);
-      
-      if (activeValues.length > 0) {
-        const productValue = product.specifications[specKey];
-        if (!activeValues.includes(productValue)) {
-          return false;
-        }
+      if (selectedValues.length > 0) {
+        activeFilters[specKey] = selectedValues;
       }
-    }
+    });
 
-    return true;
+    // If no specification filters are active, show all products
+    if (Object.keys(activeFilters).length === 0) {
+      return true;
+    }
+    
+    // For each active specification filter
+    return Object.entries(activeFilters).every(([specKey, selectedValues]) => {
+      const productValue = product.specifications?.[specKey];
+      console.log(product);
+      // Product must have this specification and its value must be one of the selected ones
+      return productValue && selectedValues.includes(productValue);
+    });
   });
 
   if (loading) {

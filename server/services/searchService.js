@@ -57,8 +57,17 @@ class SearchService {
     return searchResults.map(result => {
       const product = products.find(p => p._id.toString() === result.ref);
       if (!product) return null;
+      
+      // Convert to plain object and ensure specifications are included
+      const productObj = product.toObject({ getters: true });
+      
+      // Convert Map to plain object if it's a Map
+      if (product.specifications instanceof Map) {
+        productObj.specifications = Object.fromEntries(product.specifications);
+      }
+      
       return {
-        ...product.toObject(),
+        ...productObj,
         _score: result.score
       };
     }).filter(Boolean); // Remove any null results
