@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Home from './components/Home';
 import Cart from './components/Cart';
 import ProductDetail from './components/ProductDetail';
+import SearchResults from './components/SearchResults';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -151,33 +152,41 @@ function App() {
             </div>
           ) : (
             <Routes>
-              <Route 
-                path="/" 
+              <Route
+                path="/"
                 element={
-                  <Home 
-                    products={displayProducts} 
-                    loading={loading} 
-                    error={error} 
-                    addToCart={addToCart} 
+                  <Home
+                    products={displayProducts}
+                    loading={loading}
+                    error={error}
+                    addToCart={addToCart}
                   />
-                } 
+                }
               />
-              <Route 
-                path="/cart" 
+              <Route
+                path="/cart"
                 element={
-                  <Cart 
-                    cartItems={cart} 
-                    addToCart={addToCart} 
-                    removeFromCart={removeFromCart} 
+                  <Cart
+                    cartItems={cart}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
                     clearCart={clearCart}
                     placeOrder={placeOrder}
                   />
-                } 
+                }
               />
               <Route
                 path="/product/:id"
                 element={
                   <ProductDetail
+                    addToCart={addToCart}
+                  />
+                }
+              />
+              <Route
+                path="/search-results"
+                element={
+                  <SearchResults
                     addToCart={addToCart}
                   />
                 }

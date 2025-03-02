@@ -1,7 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProductCard from './ProductCard';
 
 const Home = ({ products, loading, error, addToCart }) => {
+  const [specQuery, setSpecQuery] = useState('');
+  const navigate = useNavigate();
+
   // Group products by category
   const productsByCategory = useMemo(() => {
     return products.reduce((acc, product) => {
@@ -13,6 +17,14 @@ const Home = ({ products, loading, error, addToCart }) => {
       return acc;
     }, {});
   }, [products]);
+
+  const handleSpecSearch = (e) => {
+    e.preventDefault();
+    if (specQuery.trim()) {
+      navigate(`/search-results?query=${encodeURIComponent(specQuery)}`);
+      setSpecQuery('');
+    }
+  };
 
   if (loading) {
     return (
@@ -33,7 +45,32 @@ const Home = ({ products, loading, error, addToCart }) => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-center">Welcome to TechShop</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-6 text-center">Welcome to TechShop</h1>
+        
+        {/* Advanced Search Box */}
+        <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold mb-3">Advanced Specification Search</h2>
+          <p className="text-gray-600 mb-4">
+            Search for products by their specific features (e.g., "resolution 1920x1080", "storage 512GB")
+          </p>
+          <form onSubmit={handleSpecSearch} className="flex gap-2">
+            <input
+              type="text"
+              value={specQuery}
+              onChange={(e) => setSpecQuery(e.target.value)}
+              placeholder="Enter specification (e.g., resolution 1920x1080)"
+              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
       
       {Object.keys(productsByCategory).length === 0 ? (
         <div className="text-center">

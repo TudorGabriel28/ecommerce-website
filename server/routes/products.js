@@ -5,7 +5,7 @@ const productController = require('../controllers/productController');
 // Get all products
 router.get('/', productController.getProducts);
 
-// Search products
+// Regular search products
 router.get('/search', productController.searchProducts);
 
 // Get search suggestions for predictive search
@@ -13,6 +13,9 @@ router.get('/suggestions', productController.getSearchSuggestions);
 
 // Get products by category
 router.get('/category/:category', productController.getProductsByCategory);
+
+// Search products by specification (Lucene)
+router.get('/specification-search', productController.searchBySpecification);
 
 // Get a single product
 router.get('/:id', productController.getProductById);

@@ -1,4 +1,15 @@
 const Product = require('../models/Product');
+const searchService = require('../services/searchService');
+
+// Initialize search index
+let searchIndexInitialized = false;
+const initializeSearchIndex = async () => {
+  if (!searchIndexInitialized) {
+    const products = await Product.find();
+    searchService.indexProducts(products);
+    searchIndexInitialized = true;
+  }
+};
 
 // Get all products
 exports.getProducts = async (req, res) => {
@@ -119,6 +130,36 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
     res.json({ message: 'Product deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Search products by specification using Lucene
+exports.searchBySpecification = async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    if (!query) {
+      return res.json([]);
+    }
+
+    // Initialize search index if needed
+    await initializeSearchIndex();
+    
+    // Get all products for result mapping
+    const products = await Product.find();
+    
+    // Perform specification search
+    const results = searchService.searchBySpecification(query, products);
+    
+    // Sort results by score if specified
+    const sortOrder = req.query.sort || 'desc';
+    results.sort((a, b) => {
+      return sortOrder === 'desc' ? b._score - a._score : a._score - b._score;
+    });
+    
+    res.json(results);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
