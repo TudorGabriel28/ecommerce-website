@@ -2,7 +2,6 @@ const elasticlunr = require('elasticlunr');
 
 class SearchService {
   constructor() {
-    // Initialize the index
     this.searchIndex = null;
     this.initIndex();
   }
@@ -17,13 +16,11 @@ class SearchService {
     });
   }
 
-  // Initialize index with products
   indexProducts(products) {
-    // Reinitialize the index
     this.initIndex();
     
     products.forEach(product => {
-      // Convert specifications map to searchable string
+      // convert specifications map to searchable string
       const specString = Object.entries(product.specifications || {})
         .map(([key, value]) => `${key}:${value}`)
         .join(' ');
@@ -38,7 +35,6 @@ class SearchService {
     });
   }
 
-  // Search products by specification
   searchBySpecification(query, products) {
     if (!this.searchIndex) {
       this.indexProducts(products);
@@ -50,18 +46,18 @@ class SearchService {
         name: {boost: 1},
         description: {boost: 1}
       },
-      expand: true // Enable fuzzy matching
+      expand: true // enable fuzzy matching
     });
 
-    // Map search results back to products with scores
+    // map search results back to products with scores
     return searchResults.map(result => {
       const product = products.find(p => p._id.toString() === result.ref);
       if (!product) return null;
       
-      // Convert to plain object and ensure specifications are included
+      // convert to plain object and ensure specifications are included
       const productObj = product.toObject({ getters: true });
       
-      // Convert Map to plain object if it's a Map
+      // convert Map to plain object if it's a Map
       if (product.specifications instanceof Map) {
         productObj.specifications = Object.fromEntries(product.specifications);
       }
@@ -70,7 +66,7 @@ class SearchService {
         ...productObj,
         _score: result.score
       };
-    }).filter(Boolean); // Remove any null results
+    }).filter(Boolean); // remove any null results
   }
 }
 

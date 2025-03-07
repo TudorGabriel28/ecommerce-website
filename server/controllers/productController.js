@@ -1,7 +1,6 @@
 const Product = require('../models/Product');
 const searchService = require('../services/searchService');
 
-// Initialize search index
 let searchIndexInitialized = false;
 const initializeSearchIndex = async () => {
   if (!searchIndexInitialized) {
@@ -11,24 +10,20 @@ const initializeSearchIndex = async () => {
   }
 };
 
-// Get all specifications
   exports.getAllSpecifications = async (req, res) => {
     try {
       const specifications = await Product.aggregate([
-        // Unwind specifications to create a document for each key-value pair
-        { $project: { specifications: { $objectToArray: "$specifications" } } },
+                { $project: { specifications: { $objectToArray: "$specifications" } } },
         { $unwind: "$specifications" },
         
-        // Group by specification key and collect unique values
-        {
+                {
           $group: {
             _id: "$specifications.k",
             values: { $addToSet: "$specifications.v" }
           }
         },
         
-        // Format the output
-        {
+                {
           $project: {
             _id: 0,
             key: "$_id",
@@ -36,12 +31,10 @@ const initializeSearchIndex = async () => {
         }
       },
       
-      // Sort by specification key
-      { $sort: { key: 1 } }
+            { $sort: { key: 1 } }
     ]);
 
-    // Convert to object format
-    const formattedSpecs = specifications.reduce((acc, spec) => {
+        const formattedSpecs = specifications.reduce((acc, spec) => {
       acc[spec.key] = spec.values;
       return acc;
     }, {});
@@ -52,7 +45,6 @@ const initializeSearchIndex = async () => {
   }
 };
 
-// Get all products
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find();
@@ -62,7 +54,6 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// Get products by category
 exports.getProductsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
@@ -73,7 +64,6 @@ exports.getProductsByCategory = async (req, res) => {
   }
 };
 
-// Search products by title or description
 exports.searchProducts = async (req, res) => {
   try {
     const { query } = req.query;
@@ -93,7 +83,6 @@ exports.searchProducts = async (req, res) => {
   }
 };
 
-// Get suggestions for predictive search
 exports.getSearchSuggestions = async (req, res) => {
   try {
     const { query } = req.query;
@@ -117,7 +106,6 @@ exports.getSearchSuggestions = async (req, res) => {
   }
 };
 
-// Get a single product
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -130,7 +118,6 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// Create a new product
 exports.createProduct = async (req, res) => {
   try {
     const product = new Product(req.body);
@@ -141,7 +128,6 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// Update a product
 exports.updateProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
@@ -158,7 +144,6 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// Delete a product
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
@@ -171,7 +156,6 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// Search products by specification using Lucene
 exports.searchBySpecification = async (req, res) => {
   try {
     const { query } = req.query;
@@ -180,16 +164,12 @@ exports.searchBySpecification = async (req, res) => {
       return res.json([]);
     }
 
-    // Initialize search index if needed
     await initializeSearchIndex();
     
-    // Get all products for result mapping
     const products = await Product.find();
     
-    // Perform specification search
     const results = searchService.searchBySpecification(query, products);
     
-    // Sort results by score if specified
     const sortOrder = req.query.sort || 'desc';
     results.sort((a, b) => {
       return sortOrder === 'desc' ? b._score - a._score : a._score - b._score;

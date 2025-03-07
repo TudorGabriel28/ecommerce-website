@@ -40,7 +40,6 @@ const ProductSchema = new mongoose.Schema({
   }
 });
 
-// Adding text index for search functionality (to be used later)
 ProductSchema.index({ name: 'text', description: 'text' });
 
 module.exports = mongoose.model('Product', ProductSchema);
